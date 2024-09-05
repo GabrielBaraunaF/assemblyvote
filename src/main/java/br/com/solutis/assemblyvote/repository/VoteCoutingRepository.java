@@ -4,4 +4,5 @@ import br.com.solutis.assemblyvote.entity.VoteCouting;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface VoteCoutingRepository extends JpaRepository<VoteCouting,Integer> {
+    VoteCouting findBySessionId(Integer sessionId);
 }

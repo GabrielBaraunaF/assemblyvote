@@ -13,7 +13,7 @@ public class Vote {
     @Column(name = "id")
     private Integer id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "MEMBER_ID",referencedColumnName = "ID")
     private Member member;
 
