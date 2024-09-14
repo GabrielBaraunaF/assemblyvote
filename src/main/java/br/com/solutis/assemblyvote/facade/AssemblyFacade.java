@@ -1,17 +1,21 @@
 package br.com.solutis.assemblyvote.facade;
 
-import br.com.solutis.assemblyvote.entity.Agenda;
-import br.com.solutis.assemblyvote.entity.Session;
-import br.com.solutis.assemblyvote.entity.Vote;
-import br.com.solutis.assemblyvote.entity.VoteCouting;
+import br.com.solutis.assemblyvote.to.AgendaTO;
+import br.com.solutis.assemblyvote.to.SessionTO;
+import br.com.solutis.assemblyvote.to.VoteCoutingTO;
+import br.com.solutis.assemblyvote.to.VoteTO;
 
 public interface AssemblyFacade {
 
-    Agenda createAgenda(Agenda agenda);
-    Session openSession(Session session);
-    Vote vote(Vote vote);
-    VoteCouting coutingVotes(int SessionId);
+    AgendaTO createAgenda(AgendaTO agendaTO);
 
+    SessionTO openSession(SessionTO sessionTO);
 
+    VoteTO vote(VoteTO voteTO);
 
+    VoteCoutingTO findVoteCounting(int SessionId);
+
+    void countVote();
+
+    void closeExpiredOpenSession();
 }
