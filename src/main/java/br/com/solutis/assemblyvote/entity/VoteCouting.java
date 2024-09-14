@@ -12,20 +12,24 @@ public class VoteCouting {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "SESSION_ID",referencedColumnName = "ID",unique = true)
+    @JoinColumn(name = "session_id", referencedColumnName = "id", unique = true)
     private Session session;
 
-    @Column(name = "YES_VOTES")
+    @Column(name = "yes_votes")
     private Integer yesVotes;
 
-    @Column(name = "PERCENT_YES_VOTES")
-    private Integer percentYesVotes;
+    @Column(name = "percent_yes_votes")
+    private Float percentYesVotes;
 
-    @Column(name = "NO_VOTES")
+    @Column(name = "no_votes")
     private Integer noVotes;
 
-    @Column(name = "PERCENT_NO_VOTES")
-    private Integer percentNoVotes;
+    @Column(name = "percent_no_votes")
+    private Float percentNoVotes;
 
     private Integer total;
+
+    private String winner;
+
+    private String status;
 }
