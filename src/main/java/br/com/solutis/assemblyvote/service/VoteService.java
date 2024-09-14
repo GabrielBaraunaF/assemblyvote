@@ -6,5 +6,8 @@ import java.util.List;
 
 public interface VoteService {
     Vote save(Vote vote);
-    List<Vote> findAllSession();
+
+    Vote update(Vote vote);
+
+    List<Vote> findAllVoteWithOpenSession();
 }

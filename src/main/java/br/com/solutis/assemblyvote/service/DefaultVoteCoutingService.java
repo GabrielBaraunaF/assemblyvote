@@ -3,10 +3,11 @@ package br.com.solutis.assemblyvote.service;
 import br.com.solutis.assemblyvote.entity.VoteCouting;
 import br.com.solutis.assemblyvote.repository.VoteCoutingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 
-public class DefaultVoteCoutingService implements VoteCoutingService{
+@Service
+public class DefaultVoteCoutingService implements VoteCoutingService {
 
 
     @Autowired
@@ -14,6 +15,7 @@ public class DefaultVoteCoutingService implements VoteCoutingService{
 
     @Override
     public VoteCouting save(VoteCouting voteCouting) {
+        voteCouting.setStatus("Aberta");
         return repository.save(voteCouting);
     }
 

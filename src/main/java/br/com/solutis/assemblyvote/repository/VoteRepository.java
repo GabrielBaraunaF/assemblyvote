@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface VoteRepository extends JpaRepository<Vote,Integer> {
 
-    @Query(value = "SELECT * FROM Vote WHERE session_id =(:sessionId) AND member_id =(:memberId)",nativeQuery = true)
+    @Query(value = "SELECT * FROM vote WHERE session_id =(:sessionId) AND member_id =(:memberId)",nativeQuery = true)
     Vote findByMemberIdAndSessionId(Integer memberId,Integer sessionId);
 }

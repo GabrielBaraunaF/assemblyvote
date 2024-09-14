@@ -11,6 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
@@ -44,7 +46,7 @@ class DefaultVoteServiceTest {
                     voteService.save(vote);
                 }
         );
-        assertEquals("A Sessão ja está fechada", exception.getMessage());
+        assertEquals("Essa sessão não pode receber mais votos.", exception.getMessage());
     }
 
     @Test
@@ -81,6 +83,8 @@ class DefaultVoteServiceTest {
         Session session = new Session();
         session.setId(1);
         session.setState("aberto");
+        session.setTime(1);
+        session.setOpening(LocalDateTime.now());
         return session;
     }
 
@@ -88,6 +92,8 @@ class DefaultVoteServiceTest {
         Session session = new Session();
         session.setId(1);
         session.setState("F");
+        session.setTime(1);
+        session.setOpening(LocalDateTime.now());
         return session;
     }
 

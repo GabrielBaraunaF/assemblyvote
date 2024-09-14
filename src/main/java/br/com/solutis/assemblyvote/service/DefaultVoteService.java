@@ -4,9 +4,11 @@ import br.com.solutis.assemblyvote.entity.Vote;
 import br.com.solutis.assemblyvote.exception.ApplicationException;
 import br.com.solutis.assemblyvote.repository.VoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class DefaultVoteService implements VoteService {
 
     @Autowired
@@ -15,18 +17,23 @@ public class DefaultVoteService implements VoteService {
     @Override
     public Vote save(Vote vote) {
         validateInsert(vote);
+        vote.setIsCounted(false);
+        return repository.save(vote);
+    }
+    @Override
+    public Vote update(Vote vote){
         return repository.save(vote);
     }
 
     @Override
-    public List<Vote> findAllSession() {
-        return repository.findAll().stream().filter(vote1 -> vote1.getSession().getState().equals("A")).toList();
+    public List<Vote> findAllVoteWithOpenSession() {
+        return repository.findAll().stream().filter(vote1 -> vote1.getSession().getState().equals("A") && !vote1.getIsCounted()).toList();
     }
 
 
     private void validateInsert(Vote vote) {
-        if (vote.getSession().getState().equals("F")){
-            throw new ApplicationException("A Sessão ja está fechada");
+        if (vote.getSession().getState().equals("F") || vote.getSession().isTheVotingDeadlineHasExpired()){
+            throw new ApplicationException("Essa sessão não pode receber mais votos.");
         }
 
         Vote voteSaved = repository.findByMemberIdAndSessionId(vote.getMember().getId(), vote.getSession().getId());

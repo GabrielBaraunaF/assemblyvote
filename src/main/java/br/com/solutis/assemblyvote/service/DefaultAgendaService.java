@@ -3,7 +3,9 @@ package br.com.solutis.assemblyvote.service;
 import br.com.solutis.assemblyvote.entity.Agenda;
 import br.com.solutis.assemblyvote.repository.AgendaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class DefaultAgendaService implements AgendaService{
 
     @Autowired
