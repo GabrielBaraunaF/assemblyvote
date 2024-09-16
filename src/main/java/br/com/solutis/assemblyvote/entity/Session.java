@@ -3,6 +3,7 @@ package br.com.solutis.assemblyvote.entity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.sql.Time;
 import java.time.LocalDateTime;

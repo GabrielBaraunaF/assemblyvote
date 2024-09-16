@@ -5,7 +5,10 @@ import br.com.solutis.assemblyvote.to.AgendaTO;
 import br.com.solutis.assemblyvote.to.SessionTO;
 import br.com.solutis.assemblyvote.to.VoteCoutingTO;
 import br.com.solutis.assemblyvote.to.VoteTO;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,19 +18,23 @@ public class AssemblyController {
     @Autowired
     private AssemblyFacade facade;
 
+
     @PostMapping("/agenda")
-    public AgendaTO createAgenda(@RequestBody AgendaTO agendaTO) {
-        return facade.createAgenda(agendaTO);
+    public ResponseEntity<AgendaTO> createUser(@Valid @RequestBody AgendaTO agendaTO) {
+        AgendaTO agenda = facade.createAgenda(agendaTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(agenda);
     }
 
     @PostMapping("/session")
-    public SessionTO openSessiom(@RequestBody SessionTO sessionTO) {
-        return facade.openSession(sessionTO);
+    public ResponseEntity<SessionTO> openSessiom(@RequestBody @Valid SessionTO sessionTO) {
+        SessionTO session = facade.openSession(sessionTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(session);
     }
 
     @PostMapping("/vote")
-    public VoteTO vote(@RequestBody VoteTO voteTO) {
-        return facade.vote(voteTO);
+    public ResponseEntity<VoteTO> vote(@RequestBody @Valid VoteTO voteTO) {
+        VoteTO vote = facade.vote(voteTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(vote);
     }
 
     @GetMapping("/votecouting/{sessionId}")

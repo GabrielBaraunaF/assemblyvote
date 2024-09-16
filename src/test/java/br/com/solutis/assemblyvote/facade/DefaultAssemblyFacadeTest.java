@@ -2,6 +2,7 @@ package br.com.solutis.assemblyvote.facade;
 
 import br.com.solutis.assemblyvote.entity.*;
 import br.com.solutis.assemblyvote.event.SessionCloseEvent;
+import br.com.solutis.assemblyvote.exception.ApplicationException;
 import br.com.solutis.assemblyvote.mapper.AgendaMapper;
 import br.com.solutis.assemblyvote.mapper.SessionMapper;
 import br.com.solutis.assemblyvote.mapper.VoteCoutingMapper;
@@ -53,7 +54,7 @@ class DefaultAssemblyFacadeTest {
     @Mock
     private VoteCoutingService voteCoutingService;
     @Captor
-    ArgumentCaptor<VoteCouting> voteCoutingCaptor;
+    ArgumentCaptor<List<VoteCounting>> voteCoutingCaptor;
     @Mock
     private SessionCloseEvent producer;
     @Captor
@@ -81,6 +82,21 @@ class DefaultAssemblyFacadeTest {
     }
 
     @Test
+    void givenOpenSessionWithAgendaNotExitsMustThrowException() {
+        SessionTO sessionTo = new SessionTO();
+        sessionTo.setAgendaId(1);
+        sessionTo.setTimeOpen(2);
+        when(agendaService.findById(anyInt())).thenReturn(null);
+        ApplicationException exception = assertThrows(
+                ApplicationException.class,
+                () -> {
+                    facade.openSession(sessionTo);
+                }
+        );
+        assertEquals("Agenda not found", exception.getMessage());
+    }
+
+    @Test
     void shouldOpenNewSession() {
         SessionTO sessionTo = new SessionTO();
         sessionTo.setAgendaId(1);
@@ -91,6 +107,9 @@ class DefaultAssemblyFacadeTest {
         sessionEntrada.setTimeOpen(2);
 
         Agenda agenda = getAgenda();
+        agenda.setTopic("topic");
+
+        when(agendaService.findById(anyInt())).thenReturn(agenda);
 
         Session session = new Session();
         session.setAgenda(agenda);
@@ -160,12 +179,40 @@ class DefaultAssemblyFacadeTest {
     }
 
     @Test
-    void coutingVotes() {
+    void ShouldMustThorwExcepetionWhenCpfValidatorIsFalse() {
+        Member member = getMember();
+
+        when(memberService.findById(1)).thenReturn(member);
+
+        Agenda agenda = getAgenda();
+
+        Session session = getSession(agenda);
+
+        Vote vote = getVote(member, session);
+        VoteTO voteTO = new VoteTO();
+        voteTO.setMemberId(1);
+        voteTO.setSessionID(1);
+        voteTO.setAgree("S");
+
+        when(cpfValidatorAPIService.isValid(vote.getMember().getCpf())).thenReturn(false);
+
+        ApplicationException exception = assertThrows(
+                ApplicationException.class,
+                () -> {
+                    facade.vote(voteTO);
+                }
+        );
+        assertEquals("Association prevented from voting", exception.getMessage());
+    }
+
+
+    @Test
+    void givenSessionIdExistsShouldReturnVoteCouting() {
         voteCoutingService.findBySessionId(1);
         Session session = new Session();
         session.setId(1);
 
-        VoteCouting voteCouting = new VoteCouting();
+        VoteCounting voteCouting = new VoteCounting();
         voteCouting.setNoVotes(1);
         voteCouting.setYesVotes(1);
         voteCouting.setTotal(2);
@@ -190,6 +237,31 @@ class DefaultAssemblyFacadeTest {
     }
 
     @Test
+    void givenSessionIdAlredyNotExitsMustTrhowException() {
+        voteCoutingService.findBySessionId(1);
+        Session session = new Session();
+        session.setId(1);
+
+        VoteCounting voteCouting = new VoteCounting();
+        voteCouting.setNoVotes(1);
+        voteCouting.setYesVotes(1);
+        voteCouting.setTotal(2);
+
+        voteCouting.setPercentNoVotes(50f);
+        voteCouting.setPercentYesVotes(50f);
+        voteCouting.setSession(session);
+        voteCouting.setId(1);
+        when(voteCoutingService.findBySessionId(1)).thenReturn(null);
+        ApplicationException exception = assertThrows(
+                ApplicationException.class,
+                () -> {
+                    facade.findVoteCounting(1);
+                }
+        );
+        assertEquals("Session not found", exception.getMessage());
+    }
+
+    @Test
     void givenVoteWithOpenSession() {
 
         Member member = getMember();
@@ -207,8 +279,6 @@ class DefaultAssemblyFacadeTest {
 
         facade.countVote();
         verify(voteCoutingService, times(3)).findBySessionId(vote.getSession().getId());
-        verify(voteCoutingService, times(3)).save(any(VoteCouting.class));
-        verify(voteService, times(3)).update(vote);
     }
 
     @Test
@@ -224,7 +294,7 @@ class DefaultAssemblyFacadeTest {
         listVote.add(vote);
         listVote.add(vote);
 
-        VoteCouting voteCouting = new VoteCouting();
+        VoteCounting voteCouting = new VoteCounting();
         voteCouting.setId(1);
         voteCouting.setSession(vote.getSession());
         voteCouting.setYesVotes(10);
@@ -235,18 +305,18 @@ class DefaultAssemblyFacadeTest {
 
         facade.countVote();
 
-        verify(voteCoutingService, times(3)).save(voteCoutingCaptor.capture());
-        System.out.println(voteCoutingCaptor.getValue().getYesVotes());
-        assertEquals(voteCouting.getYesVotes(), voteCoutingCaptor.getValue().getYesVotes());
-        assertEquals(voteCouting.getNoVotes(), voteCoutingCaptor.getValue().getNoVotes());
+        verify(voteCoutingService, times(1)).saveAll(voteCoutingCaptor.capture());
+        assertEquals(voteCouting.getYesVotes(), voteCoutingCaptor.getValue().get(1).getYesVotes());
+        assertEquals(voteCouting.getNoVotes(), voteCoutingCaptor.getValue().get(1).getNoVotes());
     }
+
     @Test
-    void ShouldClosedOpenSessions(){
+    void ShouldClosedOpenSessions() {
         List<Session> sessionList = new ArrayList<>();
         sessionList.add(getSession(getAgenda()));
         when(sessionService.findAllOpenSession()).thenReturn(sessionList);
 
-        Session session =sessionList.get(0);
+        Session session = sessionList.get(0);
         LocalDateTime dataHora = LocalDateTime.of(2023, 3, 15, 10, 30);
         session.setOpening(dataHora);
         session.setTime(1);
@@ -269,7 +339,7 @@ class DefaultAssemblyFacadeTest {
         verify(sessionService, times(1)).update(sessionArgumentCaptor.capture());
         verify(producer).sendMessage(sessionTO);
 
-        assertEquals(sessionPersist,sessionArgumentCaptor.getValue());
+        assertEquals(sessionPersist, sessionArgumentCaptor.getValue());
 
     }
 

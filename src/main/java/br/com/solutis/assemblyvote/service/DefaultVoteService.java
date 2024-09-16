@@ -30,16 +30,21 @@ public class DefaultVoteService implements VoteService {
         return repository.findAll().stream().filter(vote1 -> vote1.getSession().getState().equals("A") && !vote1.getIsCounted()).toList();
     }
 
+    @Override
+    public void saveAll(List<Vote> voteList) {
+        repository.saveAll(voteList);
+    }
+
 
     private void validateInsert(Vote vote) {
         if (vote.getSession().getState().equals("F") || vote.getSession().isTheVotingDeadlineHasExpired()){
-            throw new ApplicationException("Essa sessão não pode receber mais votos.");
+            throw new ApplicationException("This session cannot receive any more votes");
         }
 
         Vote voteSaved = repository.findByMemberIdAndSessionId(vote.getMember().getId(), vote.getSession().getId());
 
         if (voteSaved!=null ){
-            throw new ApplicationException("Associado ja computou voto nessa sessão");
+            throw new ApplicationException("Member has already cast a vote in this session");
         }
     }
 }

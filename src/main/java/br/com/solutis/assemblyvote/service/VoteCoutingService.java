@@ -1,10 +1,12 @@
 package br.com.solutis.assemblyvote.service;
 
-import br.com.solutis.assemblyvote.entity.VoteCouting;
+import br.com.solutis.assemblyvote.entity.VoteCounting;
 
-import java.util.Optional;
+import java.util.List;
 
 public interface VoteCoutingService {
-    VoteCouting save(VoteCouting voteCouting);
-    VoteCouting findBySessionId(Integer id);
+    VoteCounting save(VoteCounting voteCouting);
+    VoteCounting findBySessionId(Integer id);
+
+    void saveAll(List<VoteCounting> voteCountingList);
 }

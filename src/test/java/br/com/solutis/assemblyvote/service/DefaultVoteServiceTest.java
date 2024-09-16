@@ -46,7 +46,7 @@ class DefaultVoteServiceTest {
                     voteService.save(vote);
                 }
         );
-        assertEquals("Essa sessão não pode receber mais votos.", exception.getMessage());
+        assertEquals("This session cannot receive any more votes", exception.getMessage());
     }
 
     @Test

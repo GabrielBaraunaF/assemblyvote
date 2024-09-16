@@ -3,7 +3,6 @@ package br.com.solutis.assemblyvote.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
-
 @Entity
 @Data
 public class Agenda {

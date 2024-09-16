@@ -33,7 +33,7 @@ class DefaultMemberServiceTest {
                     service.findById(anyInt());
                 }
         );
-        assertEquals("Nenhum usario Cadastrado com este ID", exception.getMessage());
+        assertEquals("No user is registered with this ID.", exception.getMessage());
     }
     @Test
     void shouldReturnMemberWhenMemberExits(){

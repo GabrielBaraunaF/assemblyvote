@@ -18,7 +18,7 @@ public class DefaultMemberService implements  MemberService{
     public Member findById(Integer id) {
         Optional<Member>member = repository.findById(id);
          if (member.isEmpty()){
-             throw new ApplicationException("Nenhum usario Cadastrado com este ID");
+             throw new ApplicationException("No user is registered with this ID.");
          }
          return member.get();
     }

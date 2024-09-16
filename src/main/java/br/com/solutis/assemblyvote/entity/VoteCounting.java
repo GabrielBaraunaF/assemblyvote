@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Entity
 @Data
-public class VoteCouting {
+public class VoteCounting {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -16,18 +16,18 @@ public class VoteCouting {
     private Session session;
 
     @Column(name = "yes_votes")
-    private Integer yesVotes;
+    private int yesVotes;
 
     @Column(name = "percent_yes_votes")
     private Float percentYesVotes;
 
     @Column(name = "no_votes")
-    private Integer noVotes;
+    private int noVotes;
 
     @Column(name = "percent_no_votes")
     private Float percentNoVotes;
 
-    private Integer total;
+    private int total;
 
     private String winner;
 

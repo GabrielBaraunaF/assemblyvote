@@ -10,4 +10,6 @@ public interface VoteService {
     Vote update(Vote vote);
 
     List<Vote> findAllVoteWithOpenSession();
+
+    void saveAll(List<Vote> voteList);
 }

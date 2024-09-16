@@ -16,10 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -57,6 +56,12 @@ public class DefaultAssemblyFacade implements AssemblyFacade {
 
     @Override
     public SessionTO openSession(SessionTO sessionTO) {
+        Agenda agenda = agendaService.findById(sessionTO.getAgendaId());
+
+        if (agenda == null) {
+            throw new ApplicationException("Agenda not found");
+        }
+
         Session session = sessionMapper.toSession(sessionTO);
         session = sessionService.save(session);
         return sessionMapper.toSessionTO(session);
@@ -77,20 +82,23 @@ public class DefaultAssemblyFacade implements AssemblyFacade {
             vote = voteService.save(vote);
             return voteMapper.toVoteTO(vote);
         } else {
-            throw new ApplicationException("Associado impedido de votar");
+            throw new ApplicationException("Association prevented from voting");
         }
 
     }
 
     @Override
     public VoteCoutingTO findVoteCounting(int sessionId) {
-        VoteCouting voteCouting = voteCoutingService.findBySessionId(sessionId);
+        VoteCounting voteCouting = voteCoutingService.findBySessionId(sessionId);
+        if (voteCouting == null) {
+            throw new ApplicationException("Session not found");
+        }
         return voteCoutingMapper.toVoteCoutingTo(voteCouting);
     }
 
 
     @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.MINUTES)
-    public void rotine() {
+    private void rotine() {
         countVote();
         closeExpiredOpenSession();
     }
@@ -99,43 +107,58 @@ public class DefaultAssemblyFacade implements AssemblyFacade {
     @Override
     public void countVote() {
         List<Vote> votes = voteService.findAllVoteWithOpenSession();
-
-        VoteCouting voteCouting = new VoteCouting();
+        List<Vote> voteList = new ArrayList<>();
+        List<VoteCounting> voteCountingList = new ArrayList<>();
 
         for (Vote vote : votes) {
-            VoteCouting voteCoutingPO = voteCoutingService.findBySessionId(vote.getSession().getId());
-            if (voteCoutingPO != null) {
-                voteCouting = voteCoutingPO;
-            } else {
-                voteCouting.setSession(vote.getSession());
-            }
+            VoteCounting voteCounting = getOrCreateVoteCounting(vote);
 
-            if (voteCouting.getNoVotes() == null) voteCouting.setNoVotes(0);
-            if (voteCouting.getYesVotes() == null) voteCouting.setYesVotes(0);
-
-            if (vote.getAgree().equals("S")) {
-                voteCouting.setYesVotes(voteCouting.getYesVotes() + 1);
-            } else {
-                voteCouting.setNoVotes(voteCouting.getNoVotes() + 1);
-            }
-
-            voteCouting.setTotal(voteCouting.getTotal() == null ? 1 : voteCouting.getTotal() + 1);
+            updateVoteCounts(vote, voteCounting);
+            determineWinner(voteCounting);
 
             vote.setIsCounted(true);
 
-            Float total = Float.valueOf(voteCouting.getTotal());
-            voteCouting.setPercentNoVotes((float) (voteCouting.getNoVotes() == 0 ? 0 : voteCouting.getNoVotes() / total * 100));
-            voteCouting.setPercentYesVotes((float) (voteCouting.getYesVotes() == 0 ? 0 : voteCouting.getYesVotes() / total * 100));
+            voteCountingList.add(voteCounting);
+            voteList.add(vote);
+        }
+        if (!voteCountingList.isEmpty()) {
+            voteCoutingService.saveAll(voteCountingList);
+        }
+        if (voteList.isEmpty()) {
+            voteService.saveAll(voteList);
+        }
+    }
 
-            if (Objects.equals(voteCouting.getYesVotes(), voteCouting.getNoVotes())){
-                voteCouting.setWinner("Votação Empatada");
-            } else if (voteCouting.getYesVotes()> voteCouting.getNoVotes()) {
-                voteCouting.setWinner("A favor da pauta");
-            }else{
-                voteCouting.setWinner("Contra a Pauta");
-            }
-            voteCoutingService.save(voteCouting);
-            voteService.update(vote);
+    private VoteCounting getOrCreateVoteCounting(Vote vote) {
+        VoteCounting voteCounting = voteCoutingService.findBySessionId(vote.getSession().getId());
+        if (voteCounting == null) {
+            voteCounting = new VoteCounting();
+            voteCounting.setSession(vote.getSession());
+        }
+        return voteCounting;
+    }
+
+    private void updateVoteCounts(Vote vote, VoteCounting voteCounting) {
+
+        if ("S".equals(vote.getAgree())) {
+            voteCounting.setYesVotes(voteCounting.getYesVotes() + 1);
+        } else {
+            voteCounting.setNoVotes(voteCounting.getNoVotes() + 1);
+        }
+
+        voteCounting.setTotal(voteCounting.getTotal() + 1);
+        float total = voteCounting.getTotal();
+        voteCounting.setPercentNoVotes(voteCounting.getNoVotes() / total * 100);
+        voteCounting.setPercentYesVotes(voteCounting.getYesVotes() / total * 100);
+    }
+
+    private void determineWinner(VoteCounting voteCounting) {
+        if (voteCounting.getYesVotes() == voteCounting.getNoVotes()) {
+            voteCounting.setWinner("Votação Empatada");
+        } else if (voteCounting.getYesVotes() > voteCounting.getNoVotes()) {
+            voteCounting.setWinner("A favor da pauta");
+        } else {
+            voteCounting.setWinner("Contra a Pauta");
         }
     }
 

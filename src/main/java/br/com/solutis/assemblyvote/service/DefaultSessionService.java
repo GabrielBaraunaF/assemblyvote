@@ -20,7 +20,10 @@ public class DefaultSessionService implements SessionService {
     public Session save(Session session) {
         Session sessionSaved = repository.findByAgendaId(session.getAgenda().getId());
         if (sessionSaved != null) {
-            throw new ApplicationException("Ja existe uma sessão para essa pauta");
+            throw new ApplicationException("There is already a session for this agenda");
+        }
+        if (session.getTime() == null || session.getTime() == 0) {
+            session.setTime(1);
         }
         session.setOpening(LocalDateTime.now());
         session.setState("A");
@@ -41,7 +44,7 @@ public class DefaultSessionService implements SessionService {
     public Session findById(Integer id) {
         Optional<Session> session = repository.findById(id);
         if (session.isEmpty()) {
-            throw new ApplicationException("Sessao nao Encontrada");
+            throw new ApplicationException("session not found");
         }
         return session.get();
     }

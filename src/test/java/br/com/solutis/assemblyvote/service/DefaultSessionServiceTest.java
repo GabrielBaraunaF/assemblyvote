@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,7 +35,7 @@ class DefaultSessionServiceTest {
                     service.save(session);
                 }
         );
-        assertEquals("Ja existe uma sessão para essa pauta", exception.getMessage());
+        assertEquals("There is already a session for this agenda", exception.getMessage());
     }
 
     @Test
@@ -51,6 +52,16 @@ class DefaultSessionServiceTest {
 
         assertEquals(sessionExpected,sessionActual);
 
+    }
+    @Test
+    void givenSessionIDNotExitsMustThorwException(){
+        ApplicationException exception = assertThrows(
+                ApplicationException.class,
+                () -> {
+                    service.findById(anyInt());
+                }
+        );
+        assertEquals("session not found", exception.getMessage());
     }
 
     private Session getSession(){
