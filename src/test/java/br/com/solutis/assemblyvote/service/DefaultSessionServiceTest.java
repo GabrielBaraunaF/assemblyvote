@@ -10,6 +10,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
@@ -22,6 +25,37 @@ class DefaultSessionServiceTest {
 
     @InjectMocks
     private DefaultSessionService service;
+    @Test
+     void findAllOpenSession_shouldReturnOpenSessions() {
+        List<Session> allSessions = new ArrayList<>();
+        Session session =getSession();
+        Session session1 = getSession();
+        session1.setState("F");
+        session.setState("A");
+        allSessions.add(session);
+        allSessions.add(session1);
+
+       when(repository.findAll()).thenReturn(allSessions);
+
+        List<Session> openSessions = service.findAllOpenSession();
+
+
+        assertEquals(1, openSessions.size());
+        assertEquals("A", openSessions.get(0).getState());
+    }
+    @Test
+    void update_shouldReturnSession() {
+        Session session = new Session();
+        Session updatedSession = new Session();
+        updatedSession.setId(1);
+
+        when(repository.save(session)).thenReturn(updatedSession);
+
+        Session returnedSession = service.update(session);
+
+        assertEquals(updatedSession, returnedSession);
+
+    }
 
     @Test
     void givenNewSessionSaveWithAgendaExitsMustThrowException(){
