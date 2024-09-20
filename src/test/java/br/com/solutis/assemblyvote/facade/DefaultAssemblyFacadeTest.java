@@ -54,7 +54,7 @@ class DefaultAssemblyFacadeTest {
     @Mock
     private VoteCoutingService voteCoutingService;
     @Captor
-    ArgumentCaptor<List<VoteCounting>> voteCoutingCaptor;
+    ArgumentCaptor<VoteCounting> voteCoutingCaptor;
     @Mock
     private SessionCloseEvent producer;
     @Captor
@@ -152,7 +152,7 @@ class DefaultAssemblyFacadeTest {
         VoteTO voteTO = new VoteTO();
         voteTO.setMemberId(1);
         voteTO.setSessionID(1);
-        voteTO.setAgree("S");
+        voteTO.setAgree("y");
 
         when(cpfValidatorAPIService.isValid(vote.getMember().getCpf())).thenReturn(true);
 
@@ -161,7 +161,7 @@ class DefaultAssemblyFacadeTest {
         votePersist.setIsCounted(false);
         votePersist.setMember(member);
         votePersist.setSession(session);
-        votePersist.setAgree("S");
+        votePersist.setAgree("y");
         votePersist.setIsCounted(false);
 
         when(voteService.save(any())).thenReturn(votePersist);
@@ -170,7 +170,7 @@ class DefaultAssemblyFacadeTest {
         voteTOPersist.setVoteId(1);
         voteTOPersist.setMemberId(1);
         voteTOPersist.setSessionID(1);
-        voteTOPersist.setAgree("S");
+        voteTOPersist.setAgree("y");
 
         when(voteMapper.toVoteTO(votePersist)).thenReturn(voteTOPersist);
         VoteTO result = facade.vote(voteTO);
@@ -192,7 +192,7 @@ class DefaultAssemblyFacadeTest {
         VoteTO voteTO = new VoteTO();
         voteTO.setMemberId(1);
         voteTO.setSessionID(1);
-        voteTO.setAgree("S");
+        voteTO.setAgree("y");
 
         when(cpfValidatorAPIService.isValid(vote.getMember().getCpf())).thenReturn(false);
 
@@ -305,9 +305,9 @@ class DefaultAssemblyFacadeTest {
 
         facade.countVote();
 
-        verify(voteCoutingService, times(1)).saveAll(voteCoutingCaptor.capture());
-        assertEquals(voteCouting.getYesVotes(), voteCoutingCaptor.getValue().get(1).getYesVotes());
-        assertEquals(voteCouting.getNoVotes(), voteCoutingCaptor.getValue().get(1).getNoVotes());
+        verify(voteCoutingService, times(3)).save(voteCoutingCaptor.capture());
+        assertEquals(voteCouting.getYesVotes(), voteCoutingCaptor.getValue().getYesVotes());
+        assertEquals(voteCouting.getNoVotes(), voteCoutingCaptor.getValue().getNoVotes());
     }
 
     @Test
@@ -331,8 +331,11 @@ class DefaultAssemblyFacadeTest {
         sessionPersist.setTime(1);
         sessionPersist.setState("F");
 
+        VoteCounting voteCounting = new VoteCounting();
+
         when(sessionService.update(session)).thenReturn(sessionPersist);
         when(sessionMapper.toSessionTO(session)).thenReturn(sessionTO);
+        when(voteCoutingService.findBySessionId(1)).thenReturn(voteCounting);
 
         facade.closeExpiredOpenSession();
 
@@ -347,7 +350,7 @@ class DefaultAssemblyFacadeTest {
         Vote vote = new Vote();
         vote.setMember(member);
         vote.setSession(session);
-        vote.setAgree("S");
+        vote.setAgree("y");
         return vote;
     }
 

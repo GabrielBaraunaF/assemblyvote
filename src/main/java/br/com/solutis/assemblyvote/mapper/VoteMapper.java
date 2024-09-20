@@ -31,7 +31,6 @@ public class VoteMapper {
         voteTO.setMemberId(vote.getMember().getId());
         voteTO.setAgree(vote.getAgree());
         voteTO.setVoteId(vote.getId());
-        System.out.println(vote);
         return voteTO;
     }
 }

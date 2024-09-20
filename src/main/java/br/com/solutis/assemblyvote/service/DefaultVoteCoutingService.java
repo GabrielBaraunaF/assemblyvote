@@ -17,7 +17,6 @@ public class DefaultVoteCoutingService implements VoteCoutingService {
 
     @Override
     public VoteCounting save(VoteCounting voteCouting) {
-        voteCouting.setStatus("Aberta");
         return repository.save(voteCouting);
     }
 
@@ -26,8 +25,4 @@ public class DefaultVoteCoutingService implements VoteCoutingService {
         return repository.findBySessionId(id);
     }
 
-    @Override
-    public void saveAll(List<VoteCounting> voteCountingList) {
-        repository.saveAll(voteCountingList);
-    }
 }

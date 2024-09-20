@@ -8,5 +8,4 @@ public interface VoteCoutingService {
     VoteCounting save(VoteCounting voteCouting);
     VoteCounting findBySessionId(Integer id);
 
-    void saveAll(List<VoteCounting> voteCountingList);
 }

@@ -1,6 +1,7 @@
 package br.com.solutis.assemblyvote.facade;
 
 import br.com.solutis.assemblyvote.entity.*;
+import br.com.solutis.assemblyvote.enums.YesNoEnum;
 import br.com.solutis.assemblyvote.exception.ApplicationException;
 import br.com.solutis.assemblyvote.mapper.AgendaMapper;
 import br.com.solutis.assemblyvote.mapper.SessionMapper;
@@ -47,6 +48,7 @@ public class DefaultAssemblyFacade implements AssemblyFacade {
     @Autowired
     private SessionCloseEvent producer;
 
+
     @Override
     public AgendaTO createAgenda(AgendaTO agendaTO) {
         Agenda agenda = agendaMapper.toAgenda(agendaTO);
@@ -69,6 +71,10 @@ public class DefaultAssemblyFacade implements AssemblyFacade {
 
     @Override
     public VoteTO vote(VoteTO voteTO) {
+
+        if (!YesNoEnum.isValid(voteTO.getAgree())){
+            throw new ApplicationException("invalid vote");
+        }
 
         Member member = memberService.findById(voteTO.getMemberId());
 
@@ -107,8 +113,6 @@ public class DefaultAssemblyFacade implements AssemblyFacade {
     @Override
     public void countVote() {
         List<Vote> votes = voteService.findAllVoteWithOpenSession();
-        List<Vote> voteList = new ArrayList<>();
-        List<VoteCounting> voteCountingList = new ArrayList<>();
 
         for (Vote vote : votes) {
             VoteCounting voteCounting = getOrCreateVoteCounting(vote);
@@ -117,16 +121,11 @@ public class DefaultAssemblyFacade implements AssemblyFacade {
             determineWinner(voteCounting);
 
             vote.setIsCounted(true);
+            voteService.update(vote);
+            voteCoutingService.save(voteCounting);
 
-            voteCountingList.add(voteCounting);
-            voteList.add(vote);
         }
-        if (!voteCountingList.isEmpty()) {
-            voteCoutingService.saveAll(voteCountingList);
-        }
-        if (voteList.isEmpty()) {
-            voteService.saveAll(voteList);
-        }
+
     }
 
     private VoteCounting getOrCreateVoteCounting(Vote vote) {
@@ -134,13 +133,16 @@ public class DefaultAssemblyFacade implements AssemblyFacade {
         if (voteCounting == null) {
             voteCounting = new VoteCounting();
             voteCounting.setSession(vote.getSession());
+            voteCounting.setStatus("Open");
         }
         return voteCounting;
     }
 
     private void updateVoteCounts(Vote vote, VoteCounting voteCounting) {
 
-        if ("S".equals(vote.getAgree())) {
+        YesNoEnum answer = YesNoEnum.fromValue(vote.getAgree());
+
+        if (answer == YesNoEnum.YES) {
             voteCounting.setYesVotes(voteCounting.getYesVotes() + 1);
         } else {
             voteCounting.setNoVotes(voteCounting.getNoVotes() + 1);
@@ -154,11 +156,11 @@ public class DefaultAssemblyFacade implements AssemblyFacade {
 
     private void determineWinner(VoteCounting voteCounting) {
         if (voteCounting.getYesVotes() == voteCounting.getNoVotes()) {
-            voteCounting.setWinner("Votação Empatada");
+            voteCounting.setWinner("Tied Vote");
         } else if (voteCounting.getYesVotes() > voteCounting.getNoVotes()) {
-            voteCounting.setWinner("A favor da pauta");
+            voteCounting.setWinner("In Favor of the Agenda");
         } else {
-            voteCounting.setWinner("Contra a Pauta");
+            voteCounting.setWinner("Against the Agenda");
         }
     }
 
@@ -167,8 +169,10 @@ public class DefaultAssemblyFacade implements AssemblyFacade {
         List<Session> sessions = sessionService.findAllOpenSession();
         for (Session session : sessions) {
             if (session.isTheVotingDeadlineHasExpired()) {
+                VoteCounting voteCounting = voteCoutingService.findBySessionId(session.getId());
+                voteCounting.setStatus("closed");
+                voteCoutingService.save(voteCounting);
                 session.setState("F");
-                //TODO: CRIAR COSTANTE PARA STATE
                 session = sessionService.update(session);
                 SessionTO sessionTO = sessionMapper.toSessionTO(session);
                 producer.sendMessage(sessionTO);

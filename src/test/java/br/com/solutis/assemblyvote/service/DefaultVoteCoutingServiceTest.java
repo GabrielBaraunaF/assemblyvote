@@ -57,14 +57,6 @@ class DefaultVoteCoutingServiceTest {
 
         assertNull(actualVoteCounting);
     }
-    @Test
-     void saveAll_shouldDelegateToRepository() {
-        List<VoteCounting> voteCountingList = new ArrayList<>();
-        voteCountingList.add(new VoteCounting()); // Add some sample VoteCounting objects
 
-        service.saveAll(voteCountingList);
-
-        verify(repository).saveAll(voteCountingList);
-    }
 
 }

@@ -11,5 +11,4 @@ public interface VoteService {
 
     List<Vote> findAllVoteWithOpenSession();
 
-    void saveAll(List<Vote> voteList);
 }
