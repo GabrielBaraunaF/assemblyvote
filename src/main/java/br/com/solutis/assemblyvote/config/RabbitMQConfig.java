@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitMQConfig {
-    public static final String QUEUE_NAME = "myQueue";
+    public static final String QUEUE_NAME = "session-ended-queue";
 
     @Bean
     public Queue myQueue() {

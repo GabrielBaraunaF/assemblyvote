@@ -40,7 +40,7 @@ CREATE TABLE `vote` (
   CONSTRAINT `fk_session_id` FOREIGN KEY (`session_id`) REFERENCES `session` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `vote_couting` (
+CREATE TABLE `vote_counting` (
   `session_id` int NOT NULL,
   `yes_votes` int DEFAULT NULL,
   `no_votes` int DEFAULT NULL,
