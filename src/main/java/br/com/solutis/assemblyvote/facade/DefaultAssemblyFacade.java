@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static br.com.solutis.assemblyvote.service.DefaultSessionService.CLOSED;
+
 @Component
 public class DefaultAssemblyFacade implements AssemblyFacade {
 
@@ -172,7 +174,7 @@ public class DefaultAssemblyFacade implements AssemblyFacade {
                 VoteCounting voteCounting = voteCoutingService.findBySessionId(session.getId());
                 voteCounting.setStatus("closed");
                 voteCoutingService.save(voteCounting);
-                session.setState("F");
+                session.setState(CLOSED);
                 session = sessionService.update(session);
                 SessionTO sessionTO = sessionMapper.toSessionTO(session);
                 producer.sendMessage(sessionTO);

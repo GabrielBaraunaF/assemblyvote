@@ -24,7 +24,6 @@ public class DefaultCpfValidatorAPIService implements CpfValidatorAPIService {
         } catch (Exception ex) {
             System.out.println("erro ao se comunicar ao serviço de cpf");
         }
-        //TODO: Evoluir a logica para tratar a indisponibilidade e 404
         return true;
     }
 }

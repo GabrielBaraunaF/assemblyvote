@@ -16,6 +16,9 @@ public class DefaultSessionService implements SessionService {
     @Autowired
     private SessionRepository repository;
 
+    public static final String OPEN="A";
+    public static final String CLOSED="F";
+
     @Override
     public Session save(Session session) {
         Session sessionSaved = repository.findByAgendaId(session.getAgenda().getId());
@@ -26,7 +29,7 @@ public class DefaultSessionService implements SessionService {
             session.setTime(1);
         }
         session.setOpening(LocalDateTime.now());
-        session.setState("A");
+        session.setState(OPEN);
         return repository.save(session);
     }
 
