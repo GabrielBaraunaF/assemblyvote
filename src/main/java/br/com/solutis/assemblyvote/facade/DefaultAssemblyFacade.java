@@ -172,8 +172,10 @@ public class DefaultAssemblyFacade implements AssemblyFacade {
         for (Session session : sessions) {
             if (session.isTheVotingDeadlineHasExpired()) {
                 VoteCounting voteCounting = voteCoutingService.findBySessionId(session.getId());
-                voteCounting.setStatus("closed");
-                voteCoutingService.save(voteCounting);
+                if (voteCounting != null){
+                    voteCounting.setStatus("closed");
+                    voteCoutingService.save(voteCounting);
+                }
                 session.setState(CLOSED);
                 session = sessionService.update(session);
                 SessionTO sessionTO = sessionMapper.toSessionTO(session);
