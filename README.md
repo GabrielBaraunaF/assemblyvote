@@ -87,7 +87,9 @@ Simply use these IDs in your requests to simulate interaction with the API.
 ---
 
 
-## [API DOCS](http://localhost:8080/swagger-ui/index.html#/assembly-controller/findVoteCounting)
+## [API DOCS](http://localhost:8080/swagger-ui/index.html#/)
 
 ## [Console RabbitMq](http://localhost:15672)
+* user:user
+* password:password
 
