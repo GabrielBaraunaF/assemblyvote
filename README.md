@@ -3,7 +3,7 @@ ___
 
 This project aims to develop a REST API for managing voting sessions in a cooperative. The API allows for the registration of agendas, opening of voting sessions, receiving votes, and tallying the results.
 
-About the Service
+About the Service:
 
 The REST service that performs management between voting sessions. It uses MySql to store the data.
 
@@ -23,16 +23,18 @@ Here is what this little application demonstrates:
 # Project architecture
 
 ---
-* The design pattern used in developing this API is called the "three-tier architecture pattern" or "MVC" (Model-View-Controller) pattern, often adapted in the Spring world as the "three-tier MVC" pattern.
+The design pattern used in developing this API is called the "three-tier architecture pattern
 * controller - Controllers are managing the REST interface, interacting with services to perform operations on data, and returning an appropriate response to the client.
 * service - Contains business logic implementations, the middleware between Controller and Repository.
-* repository - Repositories are interfaces that define methods for performing persistence operations on the database, such as saving, updating, deleting, and retrieving entities
-* controler - classe for making calls to RESTfull services
+* repository - Repositories are interfaces that define methods for performing persistence operations on the database, such as saving, updating, deleting, and retrieving entities.
+* event - facilitating asynchronous communication between different parts of the application. This component adopts an event-driven architecture, allowing events to be published and consumed efficiently
+* facade - facade acts as an orchestrator that simplifies the interaction between the application's various services. It provides a unified interface to services by encapsulating the complexity of the underlying service calls.
 * entity - Entities represent the domain objects in your application. In the context of Spring and JPA (Java Persistence API), entities are typically mapped to tables in the database.
 * to - Is an object used to transfer data between application layers
 * exception - Handles application Exception
-* configuration - Application Settings
+* config - Application Settings
 * mapper - mappings between data transfer objects and domain entities
+* enums - set of predefined constant values.
 
 # Bônus Tasks
 
